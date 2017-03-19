@@ -11,6 +11,16 @@ controller.spawn({
 
 const { hears } = controller;
 
-hears('hi', 'direct_message', (bot, message) => {
-  bot.reply(message, 'how you doin?');
+hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
+  // console.log('message is: ', message);
+  const player1 = message.user;
+  const player2 = message.match[1];
+  // console.log('player1 is: ', player1, 'player2 is: ', player2);
+  bot.api.users.info({ user: player2 }, (err, player2) => {
+    if (player2.user.is_bot || player2.user.id === 'USLACKBOT') {
+      bot.reply(message, 'Bots can\'t play!');
+    } else {
+      bot.reply(message, 'Both players are human!');
+    }
+  });
 });
