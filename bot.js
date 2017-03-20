@@ -83,6 +83,10 @@ hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
                   console.log('teams is: ', teams);
                   // teams.get(message.team, (err2, teamData) => {
                     // console.log('teamData is: ', teamData);
+                  bot.startPrivateConversation({user: player2}, (err, convo) => {
+                    convo.say(`<@${player1}> has started a game of connect4 with you! We'll let you know when its your turn.`)
+                    convo.next();
+                  });
                   bot.startConversation(message, privateConvoWithPlayer1(bot, message));
                 });
               }
