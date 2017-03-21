@@ -12,7 +12,8 @@ controller.spawn({
 
 const { hears, storage: { teams } } = controller;
 
-const checkIfPlayingGame = (player1, player2, teamData, lengthToSearchOver) => {
+const checkIfPlayingGame = (player1, player2, teamData) => {
+  const lengthToSearchOver = teamData ? teamData.games.length : 0;
   for (let i = 0; i < lengthToSearchOver; i++) {
     if (teamData.games[i].player1 === player1 || teamData.games[i].player2 === player1) {
       return 'player 1';
@@ -33,7 +34,27 @@ const privateConvoWithPlayer1 = (bot, message) => {
         if (teamData.games[i].player1 === message.user) {
           // console.log('i think i\'m never hitting here');
           const theRightGame = teamData.games[i];
-          convo.ask(`${theRightGame.boardStr} It's your turn. Choose a # between 1-7 to select a column.`);
+          convo.ask(`${theRightGame.boardStr} It's your turn. Choose a # between 1-7 to select a column.`, [{
+            pattern: '[1-7]',
+            callback: (response, convo) => {
+              console.log('response is: ', response);
+              convo.say(`You responded ${response.text}`);
+              convo.next();
+            },
+          }, {
+            default: true,
+            callback: (response, convo) => {
+              convo.say('Invalid move! Please type a number from 1-7 to select a column.');
+              convo.repeat();
+              convo.next();
+            },
+          }
+          ], { key: 'move' });
+          convo.on('end', (convo) => {
+            if (convo.status === 'completed') {
+              console.log('this conversation is over!');
+            }
+          });
         }
       }
     });
@@ -50,8 +71,7 @@ hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
   } else {
     teams.get(message.team, (err, teamData) => {
       console.log('teamData is: ', teamData);
-      const lengthToSearchOver = teamData ? teamData.games.length : 0;
-      const playingGame = checkIfPlayingGame(player1, player2, teamData, lengthToSearchOver);
+      const playingGame = checkIfPlayingGame(player1, player2, teamData);
         if (playingGame === 'player 1') {
           bot.reply(message, 'You can\'t start a new game because you\'re already in a game!');
         } else if (playingGame === 'player 2') {
@@ -97,9 +117,19 @@ hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
 });
 
 hears('^(?!^play (<@[a-z0-9-._]+>))', 'direct_message', (bot, message) => {
-  bot.startConversation(message, (err, convo) => {
-    convo.say('I don\'t understand what you said. I exist to facilitate Connect4 games.');
-    convo.say('To start a game type the word play and directly mention the name of the user you want to play. For example...');
-    convo.say('play <@connect4>');
+  console.log('message is :', message);
+  teams.get(message.team, (err2, teamData) => {
+    const playingGame = checkIfPlayingGame(message.user, undefined, teamData);
+    if (playingGame === 'player 1' && (Number(message.text) >=1 || Number(message.text) <= 7)) {
+      bot.reply(message, 'It\s not your turn yet!')
+    } else if (playingGame === 'player 1') {
+      bot.reply(message, 'I have no idea what you said. It\s not your turn yet anyway!')
+    } else {
+      bot.startConversation(message, (err, convo) => {
+        convo.say('I don\'t understand what you said. I exist to facilitate Connect4 games.');
+        convo.say('To start a game type the word play and directly mention the name of the user you want to play. For example...');
+        convo.say('play <@connect4>');
+      });
+    }
   });
 });
