@@ -68,9 +68,11 @@ const startPrivateConvo = (player, bot, teamID) => {
               console.log('this conversation is over!');
               // console.log('message is: ', message);
               // console.log('response is: ', response);
-              /* if( message.user === theRightGame.player1) {
+              if (player === theRightGame.player1) {
                 startPrivateConvo(theRightGame.player2, bot, teamID);
-              }*/
+              } else {
+                startPrivateConvo(theRightGame.player1, bot, teamID);
+              }
             }
           });
         }
