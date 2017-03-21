@@ -133,13 +133,14 @@ hears('^(?!^play (<@[a-z0-9-._]+>))', 'direct_message', (bot, message) => {
       bot.reply(message, 'It\s not your turn yet!');
     } else if (playingGame === 'player 1') {
       bot.reply(message, 'I have no idea what you said. It\s not your turn yet anyway!');
-    } else if (Number(message.text) >= 1 || Number(message.text) <= 7) {
+    } else if (Number(message.text) >= 1 && Number(message.text) <= 7) {
       bot.reply(message, 'You\'re not playing a connect 4 game right now!');
     }  else {
       bot.startConversation(message, (err, convo) => {
-        convo.say('I don\'t understand what you said. I exist to facilitate Connect4 games.');
+        convo.say('I don\'t understand what you said. I exist to facilitate Connect 4 games.');
         convo.say('To start a game type the word play and directly mention the name of the user you want to play. For example...');
         convo.say('play <@connect4>');
+        convo.say('But don\'t try to play me! You can currently only play human users.');
       });
     }
   });
