@@ -50,6 +50,7 @@ const startPrivateConvo = (player, bot, teamID) => {
               theRightGame.boardStr = board.makeBoard(theRightGame.boardArr);
               console.log('theRightGame.numberInColumn is: ', theRightGame.numberInColumn)
               convo.say(`You responded ${response.text}. The new board is \n${theRightGame.boardStr}`);
+              convo.say('We\'ll let you know when it\s your turn again.');
               // console.log('response is: ', response);
               convo.next();
             },
