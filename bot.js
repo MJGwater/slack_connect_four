@@ -34,11 +34,17 @@ const privateConvoWithPlayer1 = (bot, message) => {
         if (teamData.games[i].player1 === message.user) {
           // console.log('i think i\'m never hitting here');
           const theRightGame = teamData.games[i];
+          console.log('theRightGame is: ', theRightGame);
           convo.ask(`${theRightGame.boardStr} It's your turn. Choose a # between 1-7 to select a column.`, [{
             pattern: '[1-7]',
             callback: (response, convo) => {
               console.log('response is: ', response);
-              convo.say(`You responded ${response.text}`);
+              const indexChosen = Number(response.text) - 1;
+              theRightGame.boardArr[5 - theRightGame.numberInColumn[indexChosen]][indexChosen] = 1;
+              theRightGame.numberInColumn[indexChosen]++;
+              theRightGame.boardStr = board.makeBoard(theRightGame.boardArr);
+              console.log('theRightGame.numberInColumn is: ', theRightGame.numberInColumn)
+              convo.say(`You responded ${response.text}. The new board is \n${theRightGame.boardStr}`);
               convo.next();
             },
           }, {
@@ -82,7 +88,9 @@ hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
                 bot.reply(message, 'Bots can\'t play!');
               } else {
                 // bot.reply(message, 'Both players are human!');
-                const newBoard = board.newBoardState;
+                const newBoard = [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]];
+                const newBoardStr = board.makeBoard(newBoard);
+                const numberInColumn = board.numberInColumn.slice();
                 console.log('message.team is: ', message.team);
                 teamData = teamData || {
                   id: message.team,
@@ -93,11 +101,12 @@ hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
                   player1,
                   player2,
                   boardArr: newBoard,
-                  boardStr: board.makeBoard(newBoard),
-                  numberInColumn: board.numberInColumn,
+                  boardStr: newBoardStr,
+                  numberInColumn,
                 };
                 teamData.games.push(gameData);
                 // console.log('gameData is: ', gameData);
+                console.log('teamData is: ', teamData);
                 teams.save(teamData, (err1) => {
                   if (err1) throw err1;
                   console.log('teams is: ', teams);
@@ -121,10 +130,12 @@ hears('^(?!^play (<@[a-z0-9-._]+>))', 'direct_message', (bot, message) => {
   teams.get(message.team, (err2, teamData) => {
     const playingGame = checkIfPlayingGame(message.user, undefined, teamData);
     if (playingGame === 'player 1' && (Number(message.text) >=1 || Number(message.text) <= 7)) {
-      bot.reply(message, 'It\s not your turn yet!')
+      bot.reply(message, 'It\s not your turn yet!');
     } else if (playingGame === 'player 1') {
-      bot.reply(message, 'I have no idea what you said. It\s not your turn yet anyway!')
-    } else {
+      bot.reply(message, 'I have no idea what you said. It\s not your turn yet anyway!');
+    } else if (Number(message.text) >= 1 || Number(message.text) <= 7) {
+      bot.reply(message, 'You\'re not playing a connect 4 game right now!');
+    }  else {
       bot.startConversation(message, (err, convo) => {
         convo.say('I don\'t understand what you said. I exist to facilitate Connect4 games.');
         convo.say('To start a game type the word play and directly mention the name of the user you want to play. For example...');
