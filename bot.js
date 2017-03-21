@@ -45,14 +45,23 @@ const startPrivateConvo = (player, bot, teamID) => {
             callback: (response, convo) => {
               console.log('response is: ', response);
               const indexChosen = Number(response.text) - 1;
-              theRightGame.boardArr[5 - theRightGame.numberInColumn[indexChosen]][indexChosen] = color;
-              theRightGame.numberInColumn[indexChosen]++;
-              theRightGame.boardStr = board.makeBoard(theRightGame.boardArr);
-              console.log('theRightGame.numberInColumn is: ', theRightGame.numberInColumn)
-              convo.say(`You responded ${response.text}. The new board is \n${theRightGame.boardStr}`);
-              convo.say('We\'ll let you know when it\s your turn again.');
-              // console.log('response is: ', response);
-              convo.next();
+              //condition saying if there is already a 5 in the value at indexChosen
+              if (theRightGame.numberInColumn[indexChosen] === 6) {
+                //say that the column is full. "This column is full. Please choose another column"
+                convo.say('This column is full. Please choose another column.');
+                //repeat the question
+                convo.repeat();
+                convo.next();
+              } else {
+                theRightGame.boardArr[5 - theRightGame.numberInColumn[indexChosen]][indexChosen] = color;
+                theRightGame.numberInColumn[indexChosen]++;
+                theRightGame.boardStr = board.makeBoard(theRightGame.boardArr);
+                console.log('theRightGame.numberInColumn is: ', theRightGame.numberInColumn)
+                convo.say(`You responded ${response.text}. The new board is \n${theRightGame.boardStr}`);
+                convo.say('We\'ll let you know when it\s your turn again.');
+                // console.log('response is: ', response);
+                convo.next();
+              }
             },
           }, {
             default: true,
