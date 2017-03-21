@@ -24,27 +24,33 @@ const checkIfPlayingGame = (player1, player2, teamData) => {
   }
 };
 
-
-const privateConvoWithPlayer1 = (bot, message) => {
-  return (err, convo) => {
-    teams.get(message.team, (err2, teamData) => {
+const startPrivateConvo = (player, bot, teamID) => {
+  // console.log('player is: ', player);
+  bot.startPrivateConversation({ user: player }, (err, convo) => {
+    teams.get(teamID, (err2, teamData) => {
       // console.log('teamData is: ', teamData);
       // const theRightGame
       for (let i = 0; i < teamData.games.length; i++) {
-        if (teamData.games[i].player1 === message.user) {
+        if (teamData.games[i].player1  === player || teamData.games[i].player2  === player) {
           // console.log('i think i\'m never hitting here');
           const theRightGame = teamData.games[i];
+          if (teamData.games[i].player1  === player) {
+            var color = 'black';
+          } else {
+            var color = 'red';
+          }
           console.log('theRightGame is: ', theRightGame);
           convo.ask(`${theRightGame.boardStr} It's your turn. Choose a # between 1-7 to select a column.`, [{
             pattern: '[1-7]',
             callback: (response, convo) => {
               console.log('response is: ', response);
               const indexChosen = Number(response.text) - 1;
-              theRightGame.boardArr[5 - theRightGame.numberInColumn[indexChosen]][indexChosen] = 1;
+              theRightGame.boardArr[5 - theRightGame.numberInColumn[indexChosen]][indexChosen] = color;
               theRightGame.numberInColumn[indexChosen]++;
               theRightGame.boardStr = board.makeBoard(theRightGame.boardArr);
               console.log('theRightGame.numberInColumn is: ', theRightGame.numberInColumn)
               convo.say(`You responded ${response.text}. The new board is \n${theRightGame.boardStr}`);
+              // console.log('response is: ', response);
               convo.next();
             },
           }, {
@@ -59,13 +65,19 @@ const privateConvoWithPlayer1 = (bot, message) => {
           convo.on('end', (convo) => {
             if (convo.status === 'completed') {
               console.log('this conversation is over!');
+              // console.log('message is: ', message);
+              // console.log('response is: ', response);
+              /* if( message.user === theRightGame.player1) {
+                startPrivateConvo(theRightGame.player2, bot, teamID);
+              }*/
             }
           });
         }
       }
     });
-  }
+  });
 }
+
 
 hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
   // console.log('message is: ', message);
@@ -95,7 +107,7 @@ hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
                 teamData = teamData || {
                   id: message.team,
                   games: [],
-                }
+                };
                 const gameData = {
                   id: message.team,
                   player1,
@@ -115,8 +127,12 @@ hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
                   bot.startPrivateConversation({user: player2}, (err, convo) => {
                     convo.say(`<@${player1}> has started a game of connect 4 with you! We'll let you know when its your turn.`)
                     convo.next();
+                    convo.on('end', (convo) => {
+                      if (convo.status === 'completed') {
+                        startPrivateConvo(player1, bot, message.team);
+                      }
+                    });
                   });
-                  bot.startConversation(message, privateConvoWithPlayer1(bot, message));
                 });
               }
             });

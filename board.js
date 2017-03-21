@@ -8,9 +8,9 @@ const makeBoard = (gameBoard) => {
     for (let j = 0; j < 7; j++) {
       if (gameBoard[i][j] === 0) {
         board += ':white_large_square: ';
-      } else if (gameBoard[i][j] === 1) {
+      } else if (gameBoard[i][j] === 'black') {
         board += ':black_circle: ';
-      } else if (gameBoard[i][j] === 2) {
+      } else if (gameBoard[i][j] === 'red') {
         board += ':red_circle: ';
       }
     }
