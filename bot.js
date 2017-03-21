@@ -73,7 +73,7 @@ hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
   const player2 = message.match[1];
   // console.log('player1 is: ', player1, 'player2 is: ', player2);
   if (player1 === player2) {
-    bot.reply(message, 'You can\'t play Connect4 with yourself!');
+    bot.reply(message, 'You can\'t play Connect 4 with yourself!');
   } else {
     teams.get(message.team, (err, teamData) => {
       console.log('teamData is: ', teamData);
@@ -113,7 +113,7 @@ hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
                   // teams.get(message.team, (err2, teamData) => {
                     // console.log('teamData is: ', teamData);
                   bot.startPrivateConversation({user: player2}, (err, convo) => {
-                    convo.say(`<@${player1}> has started a game of connect4 with you! We'll let you know when its your turn.`)
+                    convo.say(`<@${player1}> has started a game of connect 4 with you! We'll let you know when its your turn.`)
                     convo.next();
                   });
                   bot.startConversation(message, privateConvoWithPlayer1(bot, message));
