@@ -129,10 +129,10 @@ hears('^(?!^play (<@[a-z0-9-._]+>))', 'direct_message', (bot, message) => {
   console.log('message is :', message);
   teams.get(message.team, (err2, teamData) => {
     const playingGame = checkIfPlayingGame(message.user, undefined, teamData);
-    if (playingGame === 'player 1' && (Number(message.text) >=1 || Number(message.text) <= 7)) {
-      bot.reply(message, 'It\s not your turn yet!');
+    if (playingGame === 'player 1' && (Number(message.text) >=1 && Number(message.text) <= 7)) {
+      bot.reply(message, 'Its not your turn yet!');
     } else if (playingGame === 'player 1') {
-      bot.reply(message, 'I have no idea what you said. It\s not your turn yet anyway!');
+      bot.reply(message, 'I don\'t understand what you said. Its not your turn yet anyway!');
     } else if (Number(message.text) >= 1 && Number(message.text) <= 7) {
       bot.reply(message, 'You\'re not playing a connect 4 game right now!');
     }  else {
