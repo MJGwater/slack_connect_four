@@ -52,7 +52,7 @@ if (sameColorInARow === 4) {
 const checkForHorizontalWin = (board) => {
   let consecutiveColorInARow = 1;
   for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board.length; j++) {
+    for (let j = 0; j < board[i].length; j++) {
       console.log('board[i][j] is: ', board[i][j], 'board[i][j-1] is: ', board[i][j-1]);
       if (board[i][j] !== 0 && (board[i][j] === board[i][j-1])) {
         consecutiveColorInARow++;
@@ -72,7 +72,7 @@ const checkForHorizontalWin = (board) => {
 const checkForVerticalWin = (board) => {
   let consecutiveColorInAColumn = 1;
   for (let i = 0; i < board.length; i++) {
-    for (let j )
+    for (let j = 0; j < )
   }
 };*/
 
