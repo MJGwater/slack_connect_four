@@ -27,20 +27,12 @@ if (sameColorInARow === 4) {
   //create checkForWin function which takes the array of the game board
   checkForWin = (board) => {
     //NOTE: to see if a player has won via a horizontal connect 4: could iterate over each row and see if there are four in a row w/red or black 
-    let sameColorInARow = 1;
-    for (let i = 0; i < board.length; i++) {
-      for (let j = 0; j < board.length; j++) {
-        console.log('board[i][j] is: ', board[i][j], 'board[i][j-1] is: ', board[i][j-1]);
-        if (board[i][j] !== 0 && (board[i][j] === board[i][j-1])) {
-          sameColorInARow++;
-        }
-        console.log('sameColorInARow is: ', sameColorInARow);
-        if (sameColorInARow === 4) {
-          return true;
-        }
-      }
-      sameColorInARow = 1;
+    const horizontalWin = checkForHorizontalWin(board);
+    if (horizontalWin) {
+      return true;
     }
+    // const verticalWin = checkForVerticalWin(board);
+    
     /*
     board.forEach( (row) => {
       row.forEach( (column, index) => {
@@ -55,8 +47,35 @@ if (sameColorInARow === 4) {
       for (let j = 0; j < )   
     }*/
   };
-  //NOTE: to see if a player has won via a vertical connect 4: could iterate over each array of arrays from 0-6 and check if there are 4 in a row of 'red' or 'black' at the index being iterated over
-  //NOTE to see if a player has won via a diagonal connect 4: 
+  // NOTE: to see if a player has won via a vertical connect 4: could iterate over each array of arrays from 0-6 and check if there are 4 in a row of 'red' or 'black' at the index being iterated over
+  // NOTE to see if a player has won via a diagonal connect 4: could iterate from -2 up to 3 by 1. for each array check if the array at the current index is the same as it was at the previous array w/ the index - 1
+const checkForHorizontalWin = (board) => {
+  let consecutiveColorInARow = 1;
+  for (let i = 0; i < board.length; i++) {
+    for (let j = 0; j < board.length; j++) {
+      console.log('board[i][j] is: ', board[i][j], 'board[i][j-1] is: ', board[i][j-1]);
+      if (board[i][j] !== 0 && (board[i][j] === board[i][j-1])) {
+        consecutiveColorInARow++;
+        console.log('consecutiveColorInARow is: ', consecutiveColorInARow);
+        if (consecutiveColorInARow === 4) {
+          return true;
+        }
+      } else {
+        consecutiveColorInARow = 1;
+      }
+    }
+    consecutiveColorInARow = 1;
+  }
+  return false;
+};
+/*
+const checkForVerticalWin = (board) => {
+  let consecutiveColorInAColumn = 1;
+  for (let i = 0; i < board.length; i++) {
+    for (let j )
+  }
+};*/
+
 
 module.exports = {
   makeBoard,
