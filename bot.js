@@ -13,14 +13,12 @@ controller.spawn({
 const { hears, storage: { teams } } = controller;
 
 const checkIfPlayingGame = (player1, player2, teamData) => {
-  const lengthToSearchOver = teamData ? teamData.games.length : 0;
-  for (let i = 0; i < lengthToSearchOver; i++) {
-    if (teamData.games[i].player1 === player1 || teamData.games[i].player2 === player1) {
-      return 'player 1';
-    }
-    if (teamData.games[i].player1 === player2 || teamData.games[i].player2 === player2) {
-      return 'player 2';
-    }
+  // console.log('teamData is: ', teamData);
+  if (teamData && teamData.games[player1] && (teamData.games[player1].player1 === player1 || teamData.games[player1].player2 === player1)) {
+    return 'player 1';
+  }
+  if (teamData && teamData.games[player2] && (teamData.games[player2].player1 === player2 || teamData.games[player2].player2 === player2)) {
+    return 'player 2';
   }
 };
 
@@ -30,11 +28,9 @@ const startPrivateConvo = (player, bot, teamID) => {
     teams.get(teamID, (err2, teamData) => {
       // console.log('teamData is: ', teamData);
       // const theRightGame
-      for (let i = 0; i < teamData.games.length; i++) {
-        if (teamData.games[i].player1  === player || teamData.games[i].player2  === player) {
           // console.log('i think i\'m never hitting here');
-          const theRightGame = teamData.games[i];
-          if (teamData.games[i].player1  === player) {
+          const theRightGame = teamData.games[player];
+          if (theRightGame.player1 === player) {
             var color = 'black';
           } else {
             var color = 'red';
@@ -70,7 +66,8 @@ const startPrivateConvo = (player, bot, teamID) => {
                     convo.say(`${theRightGame.boardStr}`);
                     convo.say(`Game over! <@${player}> wins`);
                   });
-                  teamData.games.splice(i, 1);
+                  delete teamData.games[theRightGame.player1];
+                  delete teamData.games[theRightGame.player2];
                 } else if (aTie) {
                   convo.say(`${theRightGame.boardStr}`);
                   convo.say(`Game over! <@${theRightGame.player1}> and <@${theRightGame.player2}> have tied!`);
@@ -78,7 +75,8 @@ const startPrivateConvo = (player, bot, teamID) => {
                     convo.say(`${theRightGame.boardStr}`)
                     convo.say(`Game over! <@${theRightGame.player1}> and <@${theRightGame.player2}> have tied!`);
                   });
-                  teamData.games.splice(i, 1);
+                  delete teamData.games[theRightGame.player1];
+                  delete teamData.games[theRightGame.player2];
                 } else {
                   convo.say(`You responded ${response.text}. The new board is \n${theRightGame.boardStr}`);
                   convo.say('We\'ll let you know when it\s your turn again.');
@@ -118,8 +116,6 @@ const startPrivateConvo = (player, bot, teamID) => {
               console.log('the convo status is stopped!');
             }*/
           });
-        }
-      }
     });
   });
 };
@@ -152,17 +148,17 @@ hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
                 // console.log('message.team is: ', message.team);
                 teamData = teamData || {
                   id: message.team,
-                  games: [],
+                  games: {},
                 };
                 const gameData = {
-                  id: message.team,
                   player1,
                   player2,
                   boardArr: newBoard,
                   boardStr: newBoardStr,
                   numberInColumn,
                 };
-                teamData.games.push(gameData);
+                teamData.games[player1] = gameData;
+                teamData.games[player2] = gameData;
                 // console.log('gameData is: ', gameData);
                 // console.log('teamData is: ', teamData);
                 teams.save(teamData, (err1) => {
