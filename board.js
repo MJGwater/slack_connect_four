@@ -35,7 +35,10 @@ if (sameColorInARow === 4) {
     if (verticalWin) {
       return true;
     }
-    
+    const diagonalWin = checkForDiagonalWin(board);
+    if (diagonalWin) {
+      return true;
+    }
     /*
     board.forEach( (row) => {
       row.forEach( (column, index) => {
@@ -51,15 +54,14 @@ if (sameColorInARow === 4) {
     }*/
   };
   // NOTE: to see if a player has won via a vertical connect 4: could iterate over each array of arrays from 0-6 and check if there are 4 in a row of 'red' or 'black' at the index being iterated over
-  // NOTE to see if a player has won via a diagonal connect 4: could iterate from -2 up to 3 by 1. for each array check if the array at the current index is the same as it was at the previous array w/ the index - 1
 const checkForHorizontalWin = (board) => {
   let consecutiveColorInARow = 1;
   for (let i = 0; i < board.length; i++) {
     for (let j = 1; j < board[i].length; j++) { // try switching to 1
-      console.log('board[i][j] is: ', board[i][j], 'board[i][j-1] is: ', board[i][j-1]);
+      // console.log('board[i][j] is: ', board[i][j], 'board[i][j-1] is: ', board[i][j-1]);
       if (board[i][j] !== 0 && (board[i][j] === board[i][j-1])) {
         consecutiveColorInARow++;
-        console.log('consecutiveColorInARow is: ', consecutiveColorInARow);
+        // console.log('consecutiveColorInARow is: ', consecutiveColorInARow);
         if (consecutiveColorInARow === 4) {
           return true;
         }
@@ -90,6 +92,31 @@ const checkForVerticalWin = (board) => {
   return false;
 };
 
+// NOTE to see if a player has won via a diagonal connect 4: could iterate from -2 up to 3 by 1. for each array check if the array at the current index is the same as it was at the previous array w/ the index - 1
+
+const checkForDiagonalWin = (board) => {
+  let consecutiveColorDiagonally = 1;
+  for (let i = -2; i < 4; i++) {
+    var subNum = 0;
+    if (i < 0) {
+      subNum = Math.abs(i);
+    }
+    for (let j = 0; j < board.length - subNum - 1; j++) {
+      // console.log('j is: ', j, 'subNum is: ', subNum);
+      // console.log('board[j][j-subNum] is: ', board[j][j-subNum], 'board[j-1][j-subNum-1] is: ', board[j-1][j-subNum-1]);
+      // console.log(board[5][0]);
+      if (board[5 - subNum - j][j] !== 0 && board[5 - subNum - j][j] === board[5 -subNum - j - 1][j+1]) {
+        if (++consecutiveColorDiagonally === 4) {
+          return true;
+        }
+      } else {
+        consecutiveColorDiagonally = 1;
+      }
+    }
+    consecutiveColorDiagonally = 1;
+  }
+  return false;
+};
 
 module.exports = {
   makeBoard,
