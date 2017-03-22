@@ -40,6 +40,7 @@ const startPrivateConvo = (player, bot, teamID) => {
             var color = 'red';
           }
           // console.log('theRightGame is: ', theRightGame);
+          let aWinner;
           convo.ask(`${theRightGame.boardStr} It's your turn. Choose a # between 1-7 to select a column.`, [{
             pattern: '^[1-7]{1}$',
             callback: (response, convo) => {
@@ -58,10 +59,10 @@ const startPrivateConvo = (player, bot, teamID) => {
                 theRightGame.numberInColumn[indexChosen]++;
                 theRightGame.boardStr = board.makeBoard(theRightGame.boardArr);
                 // console.log('theRightGame.numberInColumn is: ', theRightGame.numberInColumn);
-                const checkForWin = board.checkForWin(theRightGame.boardArr);
-                if (checkForWin) {
-                  convo.say(`<@${player}> wins!`)
-                  convo.stop();
+                aWinner = board.checkForWin(theRightGame.boardArr);
+                if (aWinner) {
+                  convo.say(`<@${player}> wins!`);
+                  teamData.games.splice(i, 1);
                 } else {
                   convo.say(`You responded ${response.text}. The new board is \n${theRightGame.boardStr}`);
                   convo.say('We\'ll let you know when it\s your turn again.');
@@ -78,28 +79,34 @@ const startPrivateConvo = (player, bot, teamID) => {
               convo.repeat();
               convo.next();
             },
-          }
+          },
           ], { key: 'move' });
           convo.on('end', (convo) => {
             if (convo.status === 'completed') {
               // console.log('this conversation is over!');
               // console.log('message is: ', message);
               // console.log('response is: ', response);
-              if (player === theRightGame.player1) {
+              if (aWinner) {
+                console.log('the game is over!');
+                console.log('teamData is: ', teamData);
+                  /*teams.save(teamData, (err) => {
+                    if (err) throw err;
+                  });*/
+              } else if (player === theRightGame.player1) {
                 startPrivateConvo(theRightGame.player2, bot, teamID);
               } else {
                 startPrivateConvo(theRightGame.player1, bot, teamID);
               }
             }
-            if (convo.status === 'stopped') {
+            /*if (convo.status === 'stopped') {
               console.log('the convo status is stopped!');
-            }
+            }*/
           });
         }
       }
     });
   });
-}
+};
 
 
 hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
