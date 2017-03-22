@@ -41,6 +41,7 @@ const startPrivateConvo = (player, bot, teamID) => {
           }
           // console.log('theRightGame is: ', theRightGame);
           let aWinner;
+          let aTie;
           convo.ask(`${theRightGame.boardStr} It's your turn. Choose a # between 1-7 to select a column.`, [{
             pattern: '^[1-7]{1}$',
             callback: (response, convo) => {
@@ -60,8 +61,12 @@ const startPrivateConvo = (player, bot, teamID) => {
                 theRightGame.boardStr = board.makeBoard(theRightGame.boardArr);
                 // console.log('theRightGame.numberInColumn is: ', theRightGame.numberInColumn);
                 aWinner = board.checkForWin(theRightGame.boardArr);
+                aTie = board.checkForTie(theRightGame.numberInColumn);
                 if (aWinner) {
                   convo.say(`<@${player}> wins!`);
+                  teamData.games.splice(i, 1);
+                } else if (aTie) {
+                  convo.say(`<@${theRightGame.player1}> and <@${theRightGame.player2}> have tied!`);
                   teamData.games.splice(i, 1);
                 } else {
                   convo.say(`You responded ${response.text}. The new board is \n${theRightGame.boardStr}`);
@@ -86,9 +91,9 @@ const startPrivateConvo = (player, bot, teamID) => {
               // console.log('this conversation is over!');
               // console.log('message is: ', message);
               // console.log('response is: ', response);
-              if (aWinner) {
-                console.log('the game is over!');
-                console.log('teamData is: ', teamData);
+              if (aWinner || aTie) {
+                // console.log('the game is over!');
+                // console.log('teamData is: ', teamData);
                   /*teams.save(teamData, (err) => {
                     if (err) throw err;
                   });*/

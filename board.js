@@ -23,6 +23,15 @@ if (sameColorInARow === 4) {
         return true;
       }*/
 
+checkForTie = (columnTotal) => {
+  for (let i = 0; i < columnTotal.length; i++) {
+    if (columnTotal[i] !== 6) {
+      return false;
+    }
+  }
+  return true;
+};
+
 //check if a user has won
   //create checkForWin function which takes the array of the game board
   checkForWin = (board) => {
@@ -123,4 +132,5 @@ module.exports = {
   newBoardState,
   numberInColumn,
   checkForWin,
+  checkForTie,
 };
