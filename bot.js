@@ -63,10 +63,21 @@ const startPrivateConvo = (player, bot, teamID) => {
                 aWinner = board.checkForWin(theRightGame.boardArr);
                 aTie = board.checkForTie(theRightGame.numberInColumn);
                 if (aWinner) {
-                  convo.say(`<@${player}> wins!`);
+                  convo.say(`${theRightGame.boardStr}`);
+                  convo.say(`Game over! <@${player}> wins!`);
+                  var playerNotCurrentlyTakingTurn = player === theRightGame.player1  ? theRightGame.player2 : theRightGame.player1;
+                  bot.startPrivateConversation({user: playerNotCurrentlyTakingTurn}, (err, convo) => {
+                    convo.say(`${theRightGame.boardStr}`);
+                    convo.say(`Game over! <@${player}> wins`);
+                  });
                   teamData.games.splice(i, 1);
                 } else if (aTie) {
-                  convo.say(`<@${theRightGame.player1}> and <@${theRightGame.player2}> have tied!`);
+                  convo.say(`${theRightGame.boardStr}`);
+                  convo.say(`Game over! <@${theRightGame.player1}> and <@${theRightGame.player2}> have tied!`);
+                  bot.startPrivateConversation({user: playerNotCurrentlyTakingTurn}, (err, convo) => {
+                    convo.say(`${theRightGame.boardStr}`)
+                    convo.say(`Game over! <@${theRightGame.player1}> and <@${theRightGame.player2}> have tied!`);
+                  });
                   teamData.games.splice(i, 1);
                 } else {
                   convo.say(`You responded ${response.text}. The new board is \n${theRightGame.boardStr}`);
