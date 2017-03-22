@@ -31,7 +31,10 @@ if (sameColorInARow === 4) {
     if (horizontalWin) {
       return true;
     }
-    // const verticalWin = checkForVerticalWin(board);
+    const verticalWin = checkForVerticalWin(board);
+    if (verticalWin) {
+      return true;
+    }
     
     /*
     board.forEach( (row) => {
@@ -52,7 +55,7 @@ if (sameColorInARow === 4) {
 const checkForHorizontalWin = (board) => {
   let consecutiveColorInARow = 1;
   for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board[i].length; j++) {
+    for (let j = 1; j < board[i].length; j++) { // try switching to 1
       console.log('board[i][j] is: ', board[i][j], 'board[i][j-1] is: ', board[i][j-1]);
       if (board[i][j] !== 0 && (board[i][j] === board[i][j-1])) {
         consecutiveColorInARow++;
@@ -68,13 +71,24 @@ const checkForHorizontalWin = (board) => {
   }
   return false;
 };
-/*
+
 const checkForVerticalWin = (board) => {
   let consecutiveColorInAColumn = 1;
-  for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < )
+  for (let i = 0; i < 7; i++) {
+    for (let j = 1; j < board.length; j++) {
+      if (board[j][i] !== 0 && board[j][i] === board[j-1][i]) {
+        consecutiveColorInAColumn++;
+        if (consecutiveColorInAColumn === 4) {
+          return true;
+        }
+      } else {
+        consecutiveColorInAColumn = 1;
+      }
+    }
+    consecutiveColorInAColumn = 1;
   }
-};*/
+  return false;
+};
 
 
 module.exports = {
