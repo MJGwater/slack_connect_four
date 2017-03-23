@@ -22,6 +22,28 @@ const checkIfPlayingGame = (player1, player2, teamData) => {
   }
 };
 
+const postToGeneralChannelId = (bot, messages) => {
+  bot.api.channels.list({}, (err, response) => {
+    // console.log('response is: ', response);
+    let generalChannelId = '';
+    for (let i = 0; i < response.channels.length; i++) {
+      // console.log('response[i] is: ', response);
+      if (response.channels[i].name === 'general') {
+        // console.log('channel id is:', channel.id);
+        generalChannelId = response.channels[i].id;
+      }
+    }
+    for (let i = 0; i < messages.length; i++) {
+      // console.log('generalChannelId is: ', generalChannelId);
+      // console.log('messages[i] is', messages[i]);
+      bot.say({
+        text: messages[i],
+        channel: generalChannelId,
+      });
+    }
+  });
+};
+
 const startPrivateConvo = (player, bot, teamID) => {
   // console.log('player is: ', player);
   bot.startPrivateConversation({ user: player }, (err, convo) => {
@@ -66,6 +88,9 @@ const startPrivateConvo = (player, bot, teamID) => {
                     convo.say(`${theRightGame.boardStr}`);
                     convo.say(`Game over! <@${player}> wins`);
                   });
+                  // delaying post of results to general channel so the player can see them first
+                  setTimeout(postToGeneralChannelId.bind(null, bot, [`<@${player}> has defeated <@${playerNotCurrentlyTakingTurn}> in Connect 4.`, 'If you want to get in on the Connect 4 action direct message me!']), 2500);
+                  /*postToGeneralChannelId(bot, [`<@${player}> has defeated <@${playerNotCurrentlyTakingTurn}> in Connect 4.`, 'If you want to get in on the Connect 4 action direct message me!']);*/
                   delete teamData.games[theRightGame.player1];
                   delete teamData.games[theRightGame.player2];
                 } else if (aTie) {
@@ -75,6 +100,9 @@ const startPrivateConvo = (player, bot, teamID) => {
                     convo.say(`${theRightGame.boardStr}`)
                     convo.say(`Game over! <@${theRightGame.player1}> and <@${theRightGame.player2}> have tied!`);
                   });
+                  // delaying post of results to general channel so the player can see them first
+                  setTimeout(postToGeneralChannelId.bind(null, bot, [`<@${player} has tied <@${playerNotCurrentlyTakingTurn}> in Connect 4.`, 'If you want to get in on the Connect 4 action direct message me!']), 2500);
+                  /*postToGeneralChannelId(bot, [`<@${player} has tied <@${playerNotCurrentlyTakingTurn}> in Connect 4.`, 'If you want to get in on the Connect 4 action direct message me!']);*/
                   delete teamData.games[theRightGame.player1];
                   delete teamData.games[theRightGame.player2];
                 } else {
@@ -119,7 +147,6 @@ const startPrivateConvo = (player, bot, teamID) => {
     });
   });
 };
-
 
 hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
   // console.log('message is: ', message);
@@ -185,6 +212,7 @@ hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
 
 hears('^(?!^play (<@[a-z0-9-._]+>))', 'direct_message', (bot, message) => {
   // console.log('message is :', message);
+  // postToGeneralChannelId(bot, ['yo general!']);
   teams.get(message.team, (err2, teamData) => {
     const playingGame = checkIfPlayingGame(message.user, undefined, teamData);
     if (playingGame === 'player 1' && (Number(message.text) >=1 && Number(message.text) <= 7)) {
