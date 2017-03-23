@@ -23,6 +23,53 @@ const checkIfPlayingGame = (player1, player2, teamData) => {
   return false;
 };
 
+const gameOverMessages = (gameStatus, convo, theGame, player, bot, teamData) => {
+  theGame.over = true;
+  // console.log('why isn\'t the board string showing up?');
+  // console.log('theGame.boardStr is: ', theGame.boardStr);
+  convo.say(`${theGame.boardStr}`);
+  gameStatus === 'win' ? convo.say(`Game over! <@${player}> wins!`) : convo.say(`Game over! <@${theGame.player1}> and <@${theGame.player2}> have tied!`);
+  const playerNotCurrentlyTakingTurn = player === theGame.player1 ? theGame.player2 : theGame.player1;
+  bot.startPrivateConversation({ user: playerNotCurrentlyTakingTurn }, (err, convo) => {
+    convo.say(`${theGame.boardStr}`);
+    gameStatus === 'win' ? convo.say(`Game over! <@${player}> wins!`) : convo.say(`Game over! <@${theGame.player1}> and <@${theGame.player2}> have tied!`);
+  });
+  gameStatus === 'win' ? setTimeout(postToGeneralChannelId.bind(null, bot, [`Game over! <@${player}> has defeated <@${playerNotCurrentlyTakingTurn}> in Connect 4.`, 'If you want to get in on the Connect 4 action direct message me!']), 2500) : setTimeout(postToGeneralChannelId.bind(null, bot, [`<@${player}> has tied <@${playerNotCurrentlyTakingTurn}> in Connect 4.`, 'If you want to get in on the Connect 4 action direct message me!']), 2500);
+};
+
+const playerChoosesNumberBetween1and7 = (bot, teamData, theGame, color, player) => {
+  return (response, convo) => {
+    // console.log('hits here. response is: ', response);
+    // console.log('response is: ', response);
+    const indexChosen = Number(response.text) - 1;
+    // condition saying if there is already a 5 in the value at indexChosen
+    if (theGame.numberInColumn[indexChosen] === 6) {
+      // say that the column is full. "This column is full. Please choose another column"
+      convo.say('This column is full. Please choose another column.');
+      // repeat the question
+      convo.repeat();
+      convo.next();
+    } else {
+      theGame.boardArr[5 - theGame.numberInColumn[indexChosen]][indexChosen] = color;
+      theGame.numberInColumn[indexChosen]++;
+      theGame.boardStr = board.makeBoard(theGame.boardArr);
+      // console.log('theGame.numberInColumn is: ', theGame.numberInColumn);
+      const aWinner = board.checkForWin(theGame.boardArr);
+      const aTie = board.checkForTie(theGame.numberInColumn);
+      const gameOverStatus = aWinner ? 'win' : aTie ? 'tie' : false;
+      // console.log('gameOverStatus is: ', gameOverStatus);
+      if (gameOverStatus) {
+        gameOverMessages(gameOverStatus, convo, theGame, player, bot, teamData);
+      } else {
+        convo.say(`You responded ${response.text}. The new board is \n${theGame.boardStr}`);
+        convo.say('We\'ll let you know when its your turn again.');
+      }
+      // console.log('response is: ', response);
+      convo.next();
+    }
+  };
+};
+
 const postToGeneralChannelId = (bot, messages) => {
   bot.api.channels.list({}, (err, response) => {
     // console.log('response is: ', response);
@@ -50,72 +97,14 @@ const startPrivateConvo = (player, bot, teamID) => {
   bot.startPrivateConversation({ user: player }, (err, convo) => {
     teams.get(teamID, (err2, teamData) => {
       // console.log('teamData is: ', teamData);
-      // const theRightGame
+      // const theGame
           // console.log('i think i\'m never hitting here');
-      const theRightGame = teamData.games[player];
-      let color = '';
-      if (theRightGame.player1 === player) {
-        color = 'black';
-      } else {
-        color = 'red';
-      }
-      // console.log('theRightGame is: ', theRightGame);
-      let aWinner;
-      let aTie;
-      convo.ask(`${theRightGame.boardStr} It's your turn. Choose a # between 1-7 to select a column.`, [{
+      const theGame = teamData.games[player];
+      const color = theGame.player1 === player ? 'black' : 'red';
+      // console.log('theGame is: ', theGame);
+      convo.ask(`${theGame.boardStr} It's your turn. Choose a # between 1-7 to select a column.`, [{
         pattern: '^[1-7]{1}$',
-        callback: (response, convo) => {
-          // console.log('hits here. response is: ', response);
-          // console.log('response is: ', response);
-          const indexChosen = Number(response.text) - 1;
-          // condition saying if there is already a 5 in the value at indexChosen
-          if (theRightGame.numberInColumn[indexChosen] === 6) {
-            // say that the column is full. "This column is full. Please choose another column"
-            convo.say('This column is full. Please choose another column.');
-            // repeat the question
-            convo.repeat();
-            convo.next();
-          } else {
-            theRightGame.boardArr[5 - theRightGame.numberInColumn[indexChosen]][indexChosen] = color;
-            theRightGame.numberInColumn[indexChosen]++;
-            theRightGame.boardStr = board.makeBoard(theRightGame.boardArr);
-            // console.log('theRightGame.numberInColumn is: ', theRightGame.numberInColumn);
-            aWinner = board.checkForWin(theRightGame.boardArr);
-            aTie = board.checkForTie(theRightGame.numberInColumn);
-            if (aWinner) {
-              convo.say(`${theRightGame.boardStr}`);
-              convo.say(`Game over! <@${player}> wins!`);
-              const playerNotCurrentlyTakingTurn = player === theRightGame.player1 ? theRightGame.player2 : theRightGame.player1;
-              bot.startPrivateConversation({ user: playerNotCurrentlyTakingTurn }, (err, convo) => {
-                convo.say(`${theRightGame.boardStr}`);
-                convo.say(`Game over! <@${player}> wins`);
-              });
-              // delaying post of results to general channel so the player can see them first
-              setTimeout(postToGeneralChannelId.bind(null, bot, [`<@${player}> has defeated <@${playerNotCurrentlyTakingTurn}> in Connect 4.`, 'If you want to get in on the Connect 4 action direct message me!']), 2500);
-              /* postToGeneralChannelId(bot, [`<@${player}> has defeated <@${playerNotCurrentlyTakingTurn}> in Connect 4.`, 'If you want to get in on the Connect 4 action direct message me!']);*/
-              delete teamData.games[theRightGame.player1];
-              delete teamData.games[theRightGame.player2];
-            } else if (aTie) {
-              convo.say(`${theRightGame.boardStr}`);
-              convo.say(`Game over! <@${theRightGame.player1}> and <@${theRightGame.player2}> have tied!`);
-              const playerNotCurrentlyTakingTurn = player === theRightGame.player1 ? theRightGame.player2 : theRightGame.player1;
-              bot.startPrivateConversation({ user: playerNotCurrentlyTakingTurn }, (err, convo) => {
-                convo.say(`${theRightGame.boardStr}`);
-                convo.say(`Game over! <@${theRightGame.player1}> and <@${theRightGame.player2}> have tied!`);
-              });
-              // delaying post of results to general channel so the player can see them first
-              setTimeout(postToGeneralChannelId.bind(null, bot, [`<@${player} has tied <@${playerNotCurrentlyTakingTurn}> in Connect 4.`, 'If you want to get in on the Connect 4 action direct message me!']), 2500);
-              /* postToGeneralChannelId(bot, [`<@${player} has tied <@${playerNotCurrentlyTakingTurn}> in Connect 4.`, 'If you want to get in on the Connect 4 action direct message me!']);*/
-              delete teamData.games[theRightGame.player1];
-              delete teamData.games[theRightGame.player2];
-            } else {
-              convo.say(`You responded ${response.text}. The new board is \n${theRightGame.boardStr}`);
-              convo.say('We\'ll let you know when its your turn again.');
-            }
-            // console.log('response is: ', response);
-            convo.next();
-          }
-        },
+        callback: playerChoosesNumberBetween1and7(bot, teamData, theGame, color, player),
       }, {
         default: true,
         callback: (response, convo) => {
@@ -131,16 +120,19 @@ const startPrivateConvo = (player, bot, teamID) => {
           // console.log('this conversation is over!');
           // console.log('message is: ', message);
           // console.log('response is: ', response);
-          if (aWinner || aTie) {
+          if (theGame.over) {
+            // console.log('theGame.over is: ', theGame.over);
+            delete teamData.games[theGame.player1];
+            delete teamData.games[theGame.player2];
             // console.log('the game is over!');
             // console.log('teamData is: ', teamData);
               /* teams.save(teamData, (err) => {
                 if (err) throw err;
               });*/
-          } else if (player === theRightGame.player1) {
-            startPrivateConvo(theRightGame.player2, bot, teamID);
+          } else if (player === theGame.player1) {
+            startPrivateConvo(theGame.player2, bot, teamID);
           } else {
-            startPrivateConvo(theRightGame.player1, bot, teamID);
+            startPrivateConvo(theGame.player1, bot, teamID);
           }
         }
         /* if (convo.status === 'stopped') {
@@ -186,6 +178,7 @@ hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
               boardArr: newBoard,
               boardStr: newBoardStr,
               numberInColumn,
+              over: false,
             };
             teamData.games[player1] = gameData;
             teamData.games[player2] = gameData;
