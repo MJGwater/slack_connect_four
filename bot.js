@@ -171,7 +171,7 @@ hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
                 // bot.reply(message, 'Both players are human!');
                 const newBoard = [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]];
                 const newBoardStr = board.makeBoard(newBoard);
-                const numberInColumn = board.numberInColumn.slice();
+                const numberInColumn = [0, 0, 0, 0, 0, 0, 0];
                 // console.log('message.team is: ', message.team);
                 teamData = teamData || {
                   id: message.team,

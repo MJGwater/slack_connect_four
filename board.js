@@ -1,6 +1,3 @@
-const newBoardState = [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]];
-const numberInColumn = [0, 0, 0, 0, 0, 0, 0];
-
 const makeBoard = (gameBoard) => {
   // console.log('gameBoard is: ', gameBoard);
   let board = '';
@@ -129,8 +126,6 @@ const checkForDiagonalWin = (board) => {
 
 module.exports = {
   makeBoard,
-  newBoardState,
-  numberInColumn,
   checkForWin,
   checkForTie,
 };
