@@ -37,6 +37,13 @@ const gameOverMessages = (gameStatus, convo, theGame, player, bot, teamData) => 
   gameStatus === 'win' ? setTimeout(postToGeneralChannelId.bind(null, bot, [`Game over! <@${player}> has defeated <@${playerNotCurrentlyTakingTurn}> in Connect 4.`, 'If you want to get in on the Connect 4 action direct message me!']), 2500) : setTimeout(postToGeneralChannelId.bind(null, bot, [`<@${player}> has tied <@${playerNotCurrentlyTakingTurn}> in Connect 4.`, 'If you want to get in on the Connect 4 action direct message me!']), 2500);
 };
 
+const invalidMove = (response, convo) => {
+  // console.log('response is: ', response);
+  convo.say('Invalid move! Please type a number from 1-7 to select a column.');
+  convo.repeat();
+  convo.next();
+};
+
 const playerChoosesNumberBetween1and7 = (bot, teamData, theGame, color, player) => {
   return (response, convo) => {
     // console.log('hits here. response is: ', response);
@@ -107,12 +114,7 @@ const startPrivateConvo = (player, bot, teamID) => {
         callback: playerChoosesNumberBetween1and7(bot, teamData, theGame, color, player),
       }, {
         default: true,
-        callback: (response, convo) => {
-          // console.log('response is: ', response);
-          convo.say('Invalid move! Please type a number from 1-7 to select a column.');
-          convo.repeat();
-          convo.next();
-        },
+        callback: invalidMove,
       },
       ], { key: 'move' });
       convo.on('end', (convo) => {
@@ -168,18 +170,8 @@ hears('^play <@([a-z0-9-._]+)>', 'direct_message', (bot, message) => {
             const newBoardStr = board.makeBoard(newBoard);
             const numberInColumn = [0, 0, 0, 0, 0, 0, 0];
             // console.log('message.team is: ', message.team);
-            teamData = teamData || {
-              id: message.team,
-              games: {},
-            };
-            const gameData = {
-              player1,
-              player2,
-              boardArr: newBoard,
-              boardStr: newBoardStr,
-              numberInColumn,
-              over: false,
-            };
+            teamData = teamData || { id: message.team, games: {}, };
+            const gameData = { player1, player2, boardArr: newBoard, boardStr: newBoardStr, numberInColumn, over: false, };
             teamData.games[player1] = gameData;
             teamData.games[player2] = gameData;
             // console.log('gameData is: ', gameData);
