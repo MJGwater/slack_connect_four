@@ -1,9 +1,9 @@
 const controller = require('./bot-setup.js').controller;
+const gameMessages = require('./end-game.js');
+const gameCalculations = require('./game-calculations.js');
 
 const { storage: { teams } } = controller;
 
-const gameMessages = require('./end-game.js');
-const gameCalculations = require('./game-calculations.js');
 
 const invalidMove = (response, convo) => {
   convo.say('Invalid move! Please type a number from 1-7 to select a column.');
