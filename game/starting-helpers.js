@@ -8,6 +8,13 @@ const checkIfPlayingGame = (player1, player2, teamData) => {
   return false;
 };
 
+const startGameInstructions = (convo) => {
+  convo.say('To start a game type the word play and directly mention the name of the user you want to play. For example...');
+  convo.say('play <@connect4>');
+  convo.say('But don\'t try to play me! You can currently only play human users.');
+};
+
 module.exports = {
   checkIfPlayingGame,
+  startGameInstructions,
 };
